@@ -86,23 +86,3 @@ func UpdateSinglesByIdHandler(formatter *render.Render) http.HandlerFunc {
 		}
 	}
 }
-
-func AddSingleExamHandler(formatter *render.Render) http.HandlerFunc {
-	return func (w http.ResponseWriter, req *http.Request) {
-		req.ParseForm()
-		p,_ := ioutil.ReadAll(req.Body)
-		var data []string;
-		if err := json.Unmarshal(p, &data); err != nil {
-			formatter.Text(w,201,err.Error());
-		} else {
-			fmt.Println(data)
-			err := dbservices.AddSingleExam(data);
-			if err != nil {
-				formatter.Text(w,201,err.Error());
-			} else {
-				formatter.JSON(w,200,"OK")
-			}
-		}
-	}	
-}
-

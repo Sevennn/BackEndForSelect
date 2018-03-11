@@ -18,11 +18,11 @@ func FindAllSingle() (error,[]entity.SingleRes) {
     }
 	defer session.Close()
 	
-	c := session.DB("Select").C("Single")
+	c := session.DB("Select").C("Problems")
 
 	var dbresult []entity.SingleRes
 
-	err = c.Find(bson.M{}).All(&dbresult)
+	err = c.Find(bson.M{"answertype":"single"}).All(&dbresult)
 	if err != nil {
 		return err,nil
 	}
@@ -43,11 +43,11 @@ func FindAllMulti() (error,[]entity.MultipleRes) {
     }
 	defer session.Close()
 	
-	c := session.DB("Select").C("Multi")
+	c := session.DB("Select").C("Problems")
 
 	var dbresult []entity.MultipleRes
 
-	err = c.Find(bson.M{}).All(&dbresult)
+	err = c.Find(bson.M{"answertype":"multi"}).All(&dbresult)
 
 	if err != nil {
 		return err,nil
@@ -68,17 +68,84 @@ func FindSinglesByIds(ids []string) (error,[]entity.SingleRes) {
     }
 	defer session.Close()
 	var s entity.SingleRes
-	c := session.DB("Select").C("Single")
+	c := session.DB("Select").C("Problems")
 	var dbresult []entity.SingleRes
 	for i := range ids {
 		objId := bson.ObjectIdHex(ids[i])
 
-		err := c.Find(bson.M{`_id`:objId}).One(&s)
+		err := c.Find(bson.M{`_id`:objId,`answertype`:`single`}).One(&s)
 		fmt.Println(s)
-		if err != nil {
-			return err, nil
+		if err == nil {
+			dbresult = append(dbresult,s)
 		}
-		dbresult = append(dbresult,s)
+
 	}
 	return nil,dbresult
+}
+
+func FindMultisByIds(ids []string) (error,[]entity.MultipleRes) {
+    session, err := mgo.Dial(config.DBurl)
+    if err != nil {
+        return err,nil
+    }
+	defer session.Close()
+	var s entity.MultipleRes
+	c := session.DB("Select").C("Problems")
+	var dbresult []entity.MultipleRes
+	for i := range ids {
+		objId := bson.ObjectIdHex(ids[i])
+
+		err := c.Find(bson.M{`_id`:objId, `answertype`:`multi`}).One(&s)
+		fmt.Println(s)
+		if err == nil {
+			dbresult = append(dbresult,s)
+		}
+
+
+	}
+	return nil,dbresult
+}
+
+
+func FindAllExams() (error,[]entity.ExamListRes) {
+    session, err := mgo.Dial(config.DBurl)
+    if err != nil {
+        return err,nil
+    }
+	defer session.Close()
+	c := session.DB("Select").C("Exam")
+	var dbresult []entity.ExamListRes
+	err = c.Find(bson.M{}).Select(bson.M{"title":true, "_id":true}).All(&dbresult)
+
+	if err != nil {
+		return err, nil
+	}
+	return nil,dbresult
+}
+
+func GetExamById(id string) (error, entity.ExamPage) {
+	var res entity.ExamPage
+    session, err := mgo.Dial(config.DBurl)
+    if err != nil {
+        return err,res
+    }
+	defer session.Close()
+	c := session.DB("Select").C("Exam")
+	var dbresult entity.ExamRes;
+	err = c.FindId(bson.ObjectIdHex(id)).One(&dbresult)
+	if err != nil {
+		return err,res
+	}
+	err,sresult := FindSinglesByIds(dbresult.Problems)
+	if err != nil {
+		return err,res
+	}
+	err,mresult := FindMultisByIds(dbresult.Problems)
+	if err != nil {
+		return err,res
+	}
+	res.Single = sresult
+	res.Multi = mresult
+	res.Title = dbresult.Title;
+	return nil, res
 }

@@ -27,15 +27,3 @@ func UpdateSinglesById(s []entity.SingleRes) error {
 }
 
 
-func AddSingleExam(ids []string) error {
-	session, err := mgo.Dial(config.DBurl)
-    if err != nil {
-        return err
-    }
-	defer session.Close()
-	
-	c := session.DB("Select").C("Single")
-	for i := range ids {
-		
-	}
-}

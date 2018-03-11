@@ -4,7 +4,6 @@ import (
 	"go-select/entity"
 	"go-select/config"
     "gopkg.in/mgo.v2"
-	// "gopkg.in/mgo.v2/bson"
 )
 
 
@@ -43,7 +42,7 @@ func InsertMultis(s []entity.Multiple) (error) {
 		data = append(data, s[i]);
 	}
 
-	c := session.DB("Select").C("Multi")
+	c := session.DB("Select").C("Problems")
 	err = c.Insert(data...)
 
 	if err != nil {
@@ -54,17 +53,16 @@ func InsertMultis(s []entity.Multiple) (error) {
 }
 
 
-func AddSingleExam(ids []string) (error,string) {
+func AddExam(exam entity.Exam) (error) {
 	session, err := mgo.Dial(config.DBurl)
     if err != nil {
-        return err
+		return err
     }
 	defer session.Close()
-	id := bson.NewObjectId()
 	c := session.DB("Select").C("Exam")
-	err := c.insert(bson.M{"_id":id, "prolist": ids})
+	err = c.Insert(exam)
 	if err != nil {
-		return err, nil
+		return err
 	}
-	return nil, id
+	return nil
 }

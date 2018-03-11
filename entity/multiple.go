@@ -8,7 +8,9 @@ type Multiple struct {
 	Options []option `json:"options"`
 	Answer []string `json:"answer"`
 	Brief string `json:"brief"`
-	Images []string `json:"images"`
+	Images []image `json:"images"`
+	Type string `json:"type"`
+	Answertype string `json:"answertype"`
 }
 
 type MultipleRes struct {
@@ -16,6 +18,8 @@ type MultipleRes struct {
 	Options []option `json:"options"`
 	Answer []string `json:"answer"`
 	Brief string `json:"brief"`
-	Images []string `json:"images"`
+	Images []image `json:"images"`
 	Id bson.ObjectId `json:"id" bson:"_id"`
+	Type string `json:"type"`
+	Answertype string `json:"answertype"`
 }
