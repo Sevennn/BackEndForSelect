@@ -63,7 +63,7 @@ func FindAllMulti() (error,[]entity.MultipleRes) {
 
 	var dbresult []entity.MultipleRes
 
-	err = c.Find(bson.M{"answertype":"multi"}).One(&dbresult)
+	err = c.Find(bson.M{"answertype":"multi"}).All(&dbresult)
 
 	if err != nil {
 		return err,nil
