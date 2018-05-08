@@ -28,6 +28,15 @@ func GetAllMultiHandler(formatter *render.Render) http.HandlerFunc {
 func InsertMultiHandler(formatter *render.Render) http.HandlerFunc {
 	return func (w http.ResponseWriter,req *http.Request) {
 		req.ParseForm()
+		ck, er := req.Cookie("token")
+		if er != nil {
+			formatter.Text(w,403,er.Error());
+			return
+		}
+		if ok,role := TokenVerify(ck.Value); !ok || role != "teacher" {
+			formatter.Text(w,403,er.Error());
+			return
+		}
 		p,_ := ioutil.ReadAll(req.Body)
 		var data []entity.Multiple;
 		if err := json.Unmarshal(p, &data); err != nil {

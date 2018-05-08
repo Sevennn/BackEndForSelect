@@ -9,7 +9,23 @@ import (
 
 )
 
+func FindUserByName(uname string) (error, *entity.User) {
+	session, err := mgo.Dial(config.DBurl)
+    if err != nil {
+		return err,nil
+    }
+	defer session.Close()
+	
+	c := session.DB("Select").C("User")
+	
+	var dbresult entity.User
 
+	err = c.Find(bson.M{"username":uname}).One(&dbresult)
+	if err != nil {
+		return err,nil
+	}
+	return nil,&dbresult
+}
 
 func FindAllSingle() (error,[]entity.SingleRes) {
     session, err := mgo.Dial(config.DBurl)
@@ -47,7 +63,7 @@ func FindAllMulti() (error,[]entity.MultipleRes) {
 
 	var dbresult []entity.MultipleRes
 
-	err = c.Find(bson.M{"answertype":"multi"}).All(&dbresult)
+	err = c.Find(bson.M{"answertype":"multi"}).One(&dbresult)
 
 	if err != nil {
 		return err,nil

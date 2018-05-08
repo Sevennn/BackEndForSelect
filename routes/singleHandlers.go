@@ -30,6 +30,15 @@ func GetAllSingleHandler(formatter *render.Render) http.HandlerFunc {
 func InsertSingleHandler(formatter *render.Render) http.HandlerFunc {
 	return func (w http.ResponseWriter,req *http.Request) {
 		req.ParseForm()
+		ck, er := req.Cookie("token")
+		if er != nil {
+			formatter.Text(w,403,er.Error());
+			return
+		}
+		if ok,role := TokenVerify(ck.Value); !ok || role != "teacher" {
+			formatter.Text(w,403,er.Error());
+			return
+		}
 		p,_ := ioutil.ReadAll(req.Body)
 		var data []entity.Single;
 		if err := json.Unmarshal(p, &data); err != nil {
@@ -68,21 +77,3 @@ func GetSinglesByIdHandler(formatter *render.Render) http.HandlerFunc {
 	}
 }
 
-func UpdateSinglesByIdHandler(formatter *render.Render) http.HandlerFunc {
-	return func (w http.ResponseWriter, req *http.Request) {
-		req.ParseForm()
-		p,_ := ioutil.ReadAll(req.Body)
-		var data []entity.SingleRes;
-		if err := json.Unmarshal(p, &data); err != nil {
-			formatter.Text(w,201,err.Error());
-		} else {
-			fmt.Println(data)
-			err := dbservices.UpdateSinglesById(data);
-			if err != nil {
-				formatter.Text(w,201,err.Error());
-			} else {
-				formatter.JSON(w,200,"OK")
-			}
-		}
-	}
-}
