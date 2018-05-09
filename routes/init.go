@@ -36,7 +36,7 @@ func initApiRoutes(mx *mux.Router, formatter *render.Render) {
 	mx.HandleFunc("/single/get/all", GetAllSingleHandler(formatter)).Methods("GET")
 	mx.HandleFunc("/update/single/id",UpdateSingleByIdHandler(formatter)).Methods("POST")
 	mx.HandleFunc("/update/multi/id",UpdateMultiByIdHandler(formatter)).Methods("POST")
-	
+	mx.HandleFunc("/belongs", GetBelongsHandler(formatter)).Methods("POST")
 	mx.HandleFunc("/create/single", InsertSingleHandler(formatter)).Methods("POST")
 	mx.HandleFunc("/create/multi", InsertMultiHandler(formatter)).Methods("POST")
 	mx.HandleFunc("/single/get/by/id",GetSinglesByIdHandler(formatter)).Methods("POST")
@@ -46,6 +46,27 @@ func initApiRoutes(mx *mux.Router, formatter *render.Render) {
 	mx.HandleFunc("/exam/get/all", GetAllExamsHandler(formatter)).Methods("GET")
 	mx.HandleFunc("/exam/get/{id:[_a-zA-Z0-9]+}",GetExamByIdHandler(formatter)).Methods("GET")
 	mx.HandleFunc("/user/login", LoginHandler(formatter)).Methods("POST")
+}
+
+func GetBelongsHandler(formatter *render.Render)http.HandlerFunc {
+	return func (w http.ResponseWriter, req *http.Request) {
+		req.ParseForm();
+		p,_ := ioutil.ReadAll(req.Body)
+		type Id struct {
+			Id string `json:"id"`
+		}
+		var data Id;
+		if err := json.Unmarshal(p, &data); err != nil {
+			formatter.Text(w,500,err.Error());
+		} else {
+			err,r := dbservices.GetBelongs(data.Id);
+			if err != nil {
+				formatter.Text(w,201,err.Error());
+			} else {
+				formatter.JSON(w,200,r)
+			}
+		}
+	}
 }
 
 func UpdateSingleByIdHandler(formatter *render.Render) http.HandlerFunc {

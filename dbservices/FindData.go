@@ -165,3 +165,18 @@ func GetExamById(id string) (error, entity.ExamPage) {
 	res.Title = dbresult.Title;
 	return nil, res
 }
+
+func GetBelongs(id string) (error,[]entity.Exam) {
+	session, err := mgo.Dial(config.DBurl)
+    if err != nil {
+        return err,nil
+    }
+	defer session.Close()
+	c := session.DB("Select").C("Exam")
+	var dbresult []entity.Exam
+	err = c.Find(bson.M{`problems`: id}).All(&dbresult)
+	if err != nil {
+		return err,nil
+	}
+	return nil, dbresult
+}
