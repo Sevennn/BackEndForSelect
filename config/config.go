@@ -1,5 +1,5 @@
 package config
 var (
-	DBurl = "mongodb://119.29.238.158:27017"
+	DBurl = "urltodb"
 	MySigningKey = []byte("MyKey")
 )
